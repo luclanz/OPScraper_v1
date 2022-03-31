@@ -7,17 +7,17 @@ from PIL import Image
 import img2pdf
 
 
-def download_images(base_url, chapter, download_path, ext):
+def download_images(base_url, chapter, download_path, ext, page):
     from urllib.request import urlopen, Request
     import urllib
 
-    i = 1
+    i = page
     while True:
         # create the url of the chapter
         image_url = base_url + "/" + str(chapter) + "/" + str(i) + str(ext)
         # split the last part of the string before "/", getting the name of the image
         # filename = image_url.split("/")[-1]
-        filename = str(i).zfill(2) + str(ext)
+        filename = str(i).zfill(2) + ".jpg"
         # Open the url image, set stream to True, this will return the stream content.
 
         try:
@@ -27,10 +27,13 @@ def download_images(base_url, chapter, download_path, ext):
         except urllib.error.HTTPError as e:
             #print(e.code)
             if e.code == 404:
-                if i == 1:
-                    print("Try Chapter " + str(chapter) + " as png")
-                    download_images(base_url, chapter, download_path, '.png')
-                    png2jpg(download_path, chapter)
+                if i < 10:
+                    print("Try Chapter " + str(chapter) + " with different format")
+                    if str(ext) == ".jpg":
+                        download_images(base_url, chapter, download_path, '.png', i)
+                    else:
+                        download_images(base_url, chapter, download_path, '.jpg', i)
+                    #png2jpg(download_path, chapter)
                     return
                 else:
                     print("chapter " + str(chapter) + " has " + str(i - 1) + " pages")
@@ -53,7 +56,7 @@ def make_pdf(chapter, download_path):
         f.write(img2pdf.convert([(download_path + '/' + i) for i in image_list
                                  if i.endswith('.jpg')]))
 
-    delete_junk(chapter, download_path)
+    delete_junk(chapter, download_path, '.jpg')
     return print('CHAPTER ' + str(chapter) + ' -> PDF COMPLETED')
 
 def png2jpg(download_path, chapter):
@@ -75,11 +78,11 @@ def png2jpg(download_path, chapter):
             j += 1
     print('Chapter ' + str(chapter) + ' -> Fully removed ' + str(j) + ' older file(s)')
 
-def delete_junk(chapter, download_path):
+def delete_junk(chapter, download_path, ext):
     j = 0
     file_list = os.listdir(download_path)
     for i in file_list:
-        if i.endswith('.jpg'):
+        if i.endswith(str(ext)):
             os.remove(download_path + '/' + i)
             j += 1
     print('Chapter ' + str(chapter) + ' -> temp ' + str(j) + ' image(s) removed')
