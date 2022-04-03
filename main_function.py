@@ -17,7 +17,7 @@ def download_images(base_url, chapter, download_path, ext, page):
         image_url = base_url + "/" + str(chapter) + "/" + str(i) + str(ext)
         # split the last part of the string before "/", getting the name of the image
         # filename = image_url.split("/")[-1]
-        filename = str(i).zfill(2) + ".jpg"
+        filename = str(i).zfill(2) + str(ext)
         # Open the url image, set stream to True, this will return the stream content.
 
         try:
@@ -25,7 +25,6 @@ def download_images(base_url, chapter, download_path, ext, page):
             response = urlopen(request)
 
         except urllib.error.HTTPError as e:
-            #print(e.code)
             if e.code == 404:
                 if i < 10:
                     print("Try Chapter " + str(chapter) + " with different format")
@@ -33,7 +32,6 @@ def download_images(base_url, chapter, download_path, ext, page):
                         download_images(base_url, chapter, download_path, '.png', i)
                     else:
                         download_images(base_url, chapter, download_path, '.jpg', i)
-                    #png2jpg(download_path, chapter)
                     return
                 else:
                     print("chapter " + str(chapter) + " has " + str(i - 1) + " pages")
@@ -59,6 +57,7 @@ def make_pdf(chapter, download_path):
     delete_junk(chapter, download_path, '.jpg')
     return print('CHAPTER ' + str(chapter) + ' -> PDF COMPLETED')
 
+
 def png2jpg(download_path, chapter):
     # loop to convert files to jpg
     file_list = os.listdir(download_path)
@@ -73,10 +72,11 @@ def png2jpg(download_path, chapter):
     j = 0
     file_list = os.listdir(download_path)
     for i in file_list:
-        if i.endswith('.png'):  # forse: if not i.endswith('png')
+        if i.endswith('.png'):
             os.remove(download_path + '/' + i)
             j += 1
     print('Chapter ' + str(chapter) + ' -> Fully removed ' + str(j) + ' older file(s)')
+
 
 def delete_junk(chapter, download_path, ext):
     j = 0
